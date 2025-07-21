@@ -1,0 +1,388 @@
+/* Assets Component - Nueva estructura con gráfica arriba + datos intradia al lado */
+
+.assets-container {
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Layout principal */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  padding: 20px;
+  gap: 20px;
+}
+
+/* Sección superior: Gráfica + Datos intradia */
+.top-section {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  height: 500px;
+}
+
+/* Panel de gráfico */
+.chart-section {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.chart-title-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.ticker-search {
+  position: relative;
+  min-width: 200px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--color-accent);
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.search-result-item:hover {
+  background: var(--color-hover);
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.result-ticker {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.result-name {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.trimestre-selector {
+  min-width: 200px;
+}
+
+.trimestre-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.trimestre-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.chart-container {
+  flex: 1;
+  padding: 20px;
+  min-height: 400px;
+}
+
+/* Panel de datos intradia */
+.intradia-panel {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.company-header {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 16px;
+}
+
+.company-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.ticker-symbol {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.price-section {
+  text-align: center;
+}
+
+.current-price {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.price-change {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.price-change.positive {
+  color: var(--color-success);
+}
+
+.price-change.negative {
+  color: var(--color-danger);
+}
+
+.change-amount {
+  font-size: 14px;
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+.intradia-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.metric-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+  color: var(--color-text-secondary);
+}
+
+/* Sección financiera inferior */
+.financial-section {
+  flex: 1;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.financial-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.tab-button {
+  padding: 16px 24px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  color: var(--color-text);
+  background: var(--color-hover);
+}
+
+.tab-button.active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.tab-content {
+  flex: 1;
+  padding: 24px;
+  overflow: auto;
+}
+
+.analysis-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.analysis-placeholder {
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.placeholder-text {
+  font-size: 16px;
+}
+
+.financial-content {
+  height: 100%;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+  color: var(--color-text-secondary);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .top-section {
+    grid-template-columns: 1fr;
+    grid-template-rows: 400px 200px;
+    height: auto;
+  }
+  
+  .intradia-panel {
+    padding: 16px;
+  }
+  
+  .current-price {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+  
+  .chart-title-group {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .ticker-search, .trimestre-selector {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .top-section {
+    grid-template-rows: 350px 180px;
+  }
+  
+  .financial-tabs {
+    overflow-x: auto;
+  }
+  
+  .tab-button {
+    padding: 12px 16px;
+    white-space: nowrap;
+  }
+  
+  .tab-content {
+    padding: 16px;
+  }
+}

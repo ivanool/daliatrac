@@ -1,0 +1,350 @@
+/* UserBubble Component Styles */
+
+.user-bubble {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-bubble-button {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 50px;
+  padding: 6px 12px 6px 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 8px;
+  min-width: 120px;
+}
+
+/* Light mode */
+.user-bubble.theme-light .user-bubble-button {
+  background: #faf9f5;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(239, 87, 83, 0.08);
+}
+
+.user-bubble.theme-light .user-bubble-button:hover {
+  box-shadow: 0 4px 16px rgba(239, 87, 83, 0.15);
+  border-color: #d74843;
+}
+
+/* Dark mode */
+.user-bubble.theme-dark .user-bubble-button {
+  background: #232323;
+  color: #faf9f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.user-bubble.theme-dark .user-bubble-button:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  border-color: #ff6b67;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--color-accent);
+  color: #faf9f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 60px;
+  flex: 1;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: 1px;
+  line-height: 1;
+}
+
+.user-portfolios {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  line-height: 1;
+}
+
+.user-bubble.theme-light .user-portfolios {
+  color: #666;
+}
+
+.user-bubble.theme-dark .user-portfolios {
+  color: #ccc;
+}
+
+.dropdown-arrow {
+  font-size: 0.9rem;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+/* Dropdown */
+.user-dropdown {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  min-width: 280px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 12px;
+  z-index: 100;
+  padding: 16px 0;
+  animation: fadeIn 0.15s ease;
+}
+
+.user-bubble.theme-light .user-dropdown {
+  background: #faf9f5;
+  box-shadow: 0 8px 32px rgba(239, 87, 83, 0.12);
+}
+
+.user-bubble.theme-dark .user-dropdown {
+  background: #232323;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Theme Toggle in Dropdown */
+.dropdown-theme-toggle {
+  padding: 0 16px 12px 16px;
+  border-bottom: 1px solid;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-bubble.theme-light .dropdown-theme-toggle {
+  border-color: rgba(239, 87, 83, 0.2);
+}
+
+.user-bubble.theme-dark .dropdown-theme-toggle {
+  border-color: rgba(239, 87, 83, 0.3);
+}
+
+.theme-toggle-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 20px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  min-width: 70px;
+}
+
+.user-bubble.theme-light .theme-toggle-btn {
+  background: #faf9f5;
+  color: var(--color-accent);
+}
+
+.user-bubble.theme-dark .theme-toggle-btn {
+  background: #181818;
+  color: var(--color-accent);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--color-accent);
+  color: #faf9f5;
+}
+
+/* Dropdown Header */
+.dropdown-header h3 {
+  margin: 0 0 8px 16px;
+  color: var(--color-accent);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* User/Portfolio Lists */
+.user-list, .portfolio-list {
+  max-height: 150px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+
+.user-list button, .portfolio-list button {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.user-bubble.theme-light .user-list button,
+.user-bubble.theme-light .portfolio-list button {
+  color: #333;
+}
+
+.user-bubble.theme-dark .user-list button,
+.user-bubble.theme-dark .portfolio-list button {
+  color: #faf9f5;
+}
+
+.user-bubble.theme-light .user-list button:hover,
+.user-bubble.theme-light .portfolio-list button:hover {
+  background: rgba(239, 87, 83, 0.08);
+}
+
+.user-bubble.theme-dark .user-list button:hover,
+.user-bubble.theme-dark .portfolio-list button:hover {
+  background: rgba(239, 87, 83, 0.15);
+}
+
+.user-list .user-name, .portfolio-list .portfolio-name {
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-list .user-portfolios, .portfolio-list .portfolio-id {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.user-bubble.theme-light .user-list .user-portfolios,
+.user-bubble.theme-light .portfolio-list .portfolio-id {
+  color: #666;
+}
+
+.user-bubble.theme-dark .user-list .user-portfolios,
+.user-bubble.theme-dark .portfolio-list .portfolio-id {
+  color: #ccc;
+}
+
+.portfolio-item.active {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 13px;
+}
+
+.user-bubble.theme-light .portfolio-item.active {
+  background: rgba(239, 87, 83, 0.1) !important;
+}
+
+.user-bubble.theme-dark .portfolio-item.active {
+  background: rgba(239, 87, 83, 0.2) !important;
+}
+
+/* Actions */
+.dropdown-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 16px 0 16px;
+}
+
+.action-button {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-button.primary {
+  background: var(--color-accent);
+  color: #faf9f5;
+}
+
+.action-button.primary:hover {
+  background: #d74843;
+}
+
+.action-button.secondary {
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+.user-bubble.theme-light .action-button.secondary {
+  background: #faf9f5;
+}
+
+.user-bubble.theme-dark .action-button.secondary {
+  background: #232323;
+}
+
+.user-bubble.theme-light .action-button.secondary:hover {
+  background: rgba(239, 87, 83, 0.05);
+}
+
+.user-bubble.theme-dark .action-button.secondary:hover {
+  background: rgba(239, 87, 83, 0.1);
+}
+
+/* Portfolio Actions */
+.portfolio-actions {
+  padding: 8px 16px;
+}
+
+.view-portfolio {
+  width: 100%;
+  background: linear-gradient(135deg, var(--color-accent), #d74843);
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  color: #faf9f5;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+}
+
+.view-portfolio:hover {
+  background: linear-gradient(135deg, #d74843, var(--color-accent));
+  transform: translateY(-1px);
+}
+
+/* Scrollbar */
+.user-list::-webkit-scrollbar,
+.portfolio-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.user-list::-webkit-scrollbar-track,
+.portfolio-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.user-list::-webkit-scrollbar-thumb,
+.portfolio-list::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 2px;
+}
+
+.user-list::-webkit-scrollbar-thumb:hover,
+.portfolio-list::-webkit-scrollbar-thumb:hover {
+  background: #d74843;
+}

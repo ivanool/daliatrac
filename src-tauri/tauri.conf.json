@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DaliaTrac portfolio Manager",
+  "version": "1.0.0",
+  "identifier": "com.daliatrac",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "DaliaTrac Portfolio Manager",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1200,
+        "minHeight": 800,
+        "center": true,
+        "resizable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "closable": true,
+        "decorations": true,
+        "alwaysOnTop": false,
+        "fullscreen": false,
+        "transparent": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "publisher": "Ivanool",
+    "copyright": "© 2025 Ivanool. All rights reserved.",
+    "category": "Finance",
+    "shortDescription": "Professional portfolio management and financial analysis tool",
+    "longDescription": "DaliaTrac is a comprehensive portfolio management application that provides real-time market data, advanced analytics, and professional-grade tools for financial analysis and investment tracking."
+  }
+}

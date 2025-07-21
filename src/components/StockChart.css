@@ -1,0 +1,59 @@
+/* StockChart Animations */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Responsividad mejorada para StockChart */
+.stock-chart-container {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+}
+
+@media (max-width: 768px) {
+  .stock-chart-container {
+    min-height: 400px;
+  }
+  
+  .stock-chart-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+  
+  .stock-chart-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .stock-chart-period-controls {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .stock-chart-container {
+    padding: 16px !important;
+    min-height: 350px;
+  }
+  
+  .stock-chart-stats {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+}

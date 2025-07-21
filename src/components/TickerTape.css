@@ -1,0 +1,141 @@
+/* TickerTape Component */
+.ticker-tape {
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+  height: 40px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-content {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: scroll 120s linear infinite;
+  gap: 2rem;
+}
+
+.ticker-content.loading {
+  animation: none;
+  justify-content: center;
+}
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  min-width: fit-content;
+}
+
+.ticker-item:hover {
+  background: var(--color-bg);
+  transform: scale(1.05);
+}
+
+.ticker-symbol {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text);
+  min-width: 50px;
+}
+
+.ticker-price {
+  font-size: 13px;
+  color: var(--color-text);
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.ticker-change {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.ticker-change.positive {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.ticker-change.negative {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.ticker-error {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  opacity: 0.6;
+  cursor: help;
+}
+
+/* Animación de scroll infinito */
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Pausar animación al hacer hover */
+.ticker-tape:hover .ticker-content {
+  animation-play-state: paused;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .ticker-tape {
+    height: 35px;
+  }
+  
+  .ticker-item {
+    gap: 6px;
+    padding: 0 12px;
+  }
+  
+  .ticker-symbol,
+  .ticker-price {
+    font-size: 12px;
+  }
+  
+  .ticker-change {
+    font-size: 11px;
+    padding: 1px 4px;
+  }
+  
+  .ticker-content {
+    animation: scroll 100s linear infinite;
+  }
+}
+
+/* Tema específico para dark mode */
+.theme-dark .ticker-tape {
+  border-bottom-color: #374151;
+}
+
+.theme-dark .ticker-item:hover {
+  background: #1f2937;
+}
+
+/* Tema específico para light mode */
+.theme-light .ticker-tape {
+  border-bottom-color: #e5e7eb;
+}
+
+.theme-light .ticker-item:hover {
+  background: #f9fafb;
+}
