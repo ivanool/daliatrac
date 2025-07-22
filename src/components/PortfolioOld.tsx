@@ -26,7 +26,7 @@ interface HoldingInfo {
   total_shares: number;
   average_price: number;
   current_price: number | null;
-  market_value: number | null;54
+  market_value: number | null;
   total_cost: number;
   unrealized_pnl: number | null;
   unrealized_pnl_percent: number | null;
