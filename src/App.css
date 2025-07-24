@@ -1,24 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 :root {
-  /* Modo claro - Paleta moderna azul/morada */
-  --color-bg-light: #f8fafc;
-  --color-bg-dark: #0f172a;
-  --color-text-light: #0f172a;
-  --color-text-dark: #f1f5f9;
-  --color-text-secondary-light: #64748b;
+  /* Tema Makima - Colores inspirados en sus ojos dorados y cabello rojizo */
+  --makima-gold: #f4c542;           /* Dorado de sus ojos */
+  --makima-gold-light: #f7d364;     /* Dorado claro */
+  --makima-gold-dark: #d4a934;      /* Dorado oscuro */
+  --makima-red: #d63031;            /* Rojo de su cabello */
+  --makima-red-light: #fd79a8;      /* Rojo rosado claro */
+  --makima-red-dark: #a71e1e;       /* Rojo oscuro */
+  --makima-cream: #fef7e6;          /* Crema suave */
+  --makima-white: #ffffff;          /* Blanco puro */
+  --makima-gray-50: #fafafa;        /* Gris muy claro */
+  --makima-gray-100: #f5f5f5;       /* Gris claro */
+  --makima-gray-200: #eeeeee;       /* Gris medio claro */
+  --makima-gray-300: #e0e0e0;       /* Gris medio */
+  --makima-gray-600: #757575;       /* Gris texto secundario */
+  --makima-gray-900: #212121;       /* Gris texto principal */
+  
+  /* Modo claro - Tema Makima */
+  --color-bg-light: var(--makima-cream);
+  --color-bg-dark: #0f0a0a;
+  --color-text-light: var(--makima-gray-900);
+  --color-text-dark: var(--makima-cream);
+  --color-text-secondary-light: var(--makima-gray-600);
   --color-text-secondary-dark: #94a3b8;
-  --color-accent: #6366f1;
-  --color-accent-hover: #4f46e5;
-  --color-secondary: #8b5cf6;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-header-light: #ffffff;
-  --color-header-dark: #1e293b;
-  --color-card-light: #ffffff;
+  --color-accent: var(--makima-gold);
+  --color-accent-hover: var(--makima-gold-dark);
+  --color-secondary: var(--makima-red);
+  --color-secondary-hover: var(--makima-red-dark);
+  --color-success: #27ae60;
+  --color-warning: var(--makima-gold);
+  --color-error: var(--makima-red);
+  --color-header-light: var(--makima-white);
+  --color-header-dark: #1a0f0f;
+  --color-card-light: var(--makima-white);
   --color-card-dark: #1e293b;
-  --color-border-light: #e2e8f0;
+  --color-border-light: var(--makima-gray-200);
   --color-border-dark: #334155;
-  --color-shadow-light: rgba(99, 102, 241, 0.1);
+  --color-shadow-light: rgba(244, 197, 66, 0.15);
   --color-shadow-dark: rgba(0, 0, 0, 0.3);
 }
 
@@ -50,6 +69,7 @@ body.theme-light {
   background: var(--color-bg-light);
   color: var(--color-text-light);
 }
+
 body.theme-dark {
   background: var(--color-bg-dark);
   color: var(--color-text-dark);
@@ -62,26 +82,37 @@ body.theme-dark {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
   overflow-x: hidden;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .app {
   min-height: 100vh;
   background: var(--color-bg);
   color: var(--color-text);
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .header {
   background: var(--color-header);
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
-  transition: background 0.3s, color 0.3s;
-  padding: 12px 20px;
+  transition: background 0.3s ease, color 0.3s ease;
+  padding: 16px 24px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 3px var(--color-shadow-light);
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+.theme-light .header {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid var(--makima-gray-200);
 }
 
 .header-content {
@@ -469,22 +500,29 @@ body {
   color: var(--color-accent);
 }
 
-/* Buttons */
+/* Buttons - Tema Makima */
 .add-symbol-btn {
-  background: var(--color-accent);
-  color: #faf9f5;
+  background: linear-gradient(135deg, var(--makima-gold), var(--makima-gold-dark));
+  color: var(--makima-gray-900);
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 12px;
-  transition: all 0.2s ease;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(244, 197, 66, 0.25);
 }
 
 .add-symbol-btn:hover {
-  background: #d74843;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, var(--makima-gold-dark), var(--makima-gold));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 197, 66, 0.35);
+}
+
+.add-symbol-btn:active {
+  transform: translateY(0);
 }
 
 /* Loading spinner */
@@ -554,12 +592,14 @@ body {
 }
 
 .back-button, .theme-toggle, .refresh-button {
-  padding: 10px 15px;
-  border-radius: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  font-size: 14px;
 }
 
 .portfolio-container.dark .back-button,
@@ -572,13 +612,23 @@ body {
 .portfolio-container.light .back-button,
 .portfolio-container.light .theme-toggle,
 .portfolio-container.light .refresh-button {
-  background: #ef5753;
+  background: linear-gradient(135deg, var(--makima-red), var(--makima-red-dark));
   color: white;
+  box-shadow: 0 2px 8px rgba(214, 48, 49, 0.25);
+}
+
+.theme-light .theme-toggle {
+  background: linear-gradient(135deg, var(--makima-gold), var(--makima-gold-dark)) !important;
+  color: var(--makima-gray-900) !important;
 }
 
 .back-button:hover, .theme-toggle:hover, .refresh-button:hover {
   transform: translateY(-2px);
-  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(214, 48, 49, 0.35);
+}
+
+.theme-light .theme-toggle:hover {
+  box-shadow: 0 4px 12px rgba(244, 197, 66, 0.35) !important;
 }
 
 .portfolio-title h1 {
@@ -589,8 +639,9 @@ body {
 
 .portfolio-title p {
   margin: 5px 0 0 0;
-  opacity: 0.7;
+  opacity: 0.85;
   font-size: 0.9rem;
+  color: var(--makima-gray-600);
 }
 
 /* Portfolio Sections */
@@ -619,7 +670,8 @@ body {
 }
 
 .portfolio-container.light .portfolio-section h2 {
-  color: #ef5753;
+  color: var(--makima-red-dark);
+  font-weight: 700;
 }
 
 /* Stats Grid */
@@ -643,8 +695,9 @@ body {
 }
 
 .portfolio-container.light .stat-card {
-  background: #faf9f5;
-  border: 1px solid #e5e5e5;
+  background: var(--makima-white);
+  border: 1px solid var(--makima-gray-200);
+  box-shadow: 0 2px 8px rgba(244, 197, 66, 0.1);
 }
 
 .stat-card:hover {
@@ -662,9 +715,11 @@ body {
 .stat-card h3 {
   margin: 0 0 10px 0;
   font-size: 0.9rem;
-  opacity: 0.8;
+  opacity: 0.9;
+  color: var(--makima-gray-600);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
 .stat-value {
@@ -674,11 +729,11 @@ body {
 }
 
 .stat-value.positive {
-  color: #00d4aa;
+  color: #00b894;
 }
 
 .stat-value.negative {
-  color: #ef5753;
+  color: var(--makima-red-dark);
 }
 
 /* Tables */
@@ -703,8 +758,9 @@ body {
 }
 
 .portfolio-container.light .table-header {
-  background: #ef5753;
-  color: white;
+  background: linear-gradient(135deg, var(--makima-red), var(--makima-red-dark));
+  color: var(--makima-white);
+  font-weight: 700;
 }
 
 .holdings-table .table-header {
@@ -727,7 +783,8 @@ body {
 }
 
 .portfolio-container.light .table-row {
-  border-color: #e5e5e5;
+  border-color: var(--makima-gray-200);
+  color: var(--makima-gray-900);
 }
 
 .holdings-table .table-row {
@@ -747,7 +804,8 @@ body {
 }
 
 .portfolio-container.light .table-row:hover {
-  background: rgba(239, 87, 83, 0.05);
+  background: rgba(244, 197, 66, 0.08);
+  color: var(--makima-gray-900);
 }
 
 .ticker {
@@ -760,7 +818,8 @@ body {
 }
 
 .portfolio-container.light .ticker {
-  color: #ef5753;
+  color: var(--makima-red-dark);
+  font-weight: 700;
 }
 
 .transaction-type {
@@ -772,28 +831,33 @@ body {
 }
 
 .transaction-type.buy {
-  background: rgba(0, 212, 170, 0.2);
-  color: #00d4aa;
+  background: rgba(0, 184, 148, 0.15);
+  color: #00b894;
+  border: 1px solid rgba(0, 184, 148, 0.3);
 }
 
 .transaction-type.sell {
-  background: rgba(239, 87, 83, 0.2);
-  color: #ef5753;
+  background: rgba(214, 48, 49, 0.15);
+  color: var(--makima-red-dark);
+  border: 1px solid rgba(214, 48, 49, 0.3);
 }
 
 .positive {
-  color: #00d4aa !important;
+  color: #00b894 !important;
+  font-weight: 600;
 }
 
 .negative {
-  color: #ef5753 !important;
+  color: var(--makima-red-dark) !important;
+  font-weight: 600;
 }
 
 /* Empty State */
 .empty-state {
   text-align: center;
   padding: 40px;
-  opacity: 0.7;
+  opacity: 0.85;
+  color: var(--makima-gray-600);
 }
 
 .empty-state p {

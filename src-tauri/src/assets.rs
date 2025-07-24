@@ -28,13 +28,11 @@ fn comparar_dias_habiles(meses: i32) -> (NaiveDate, NaiveDate) {
     println!("[DEBUG] Hora actual: {} (hora: {})", ahora, ahora.hour());
     println!("[DEBUG] Fecha original hoy: {}", hoy);
     
-    // Verifica la hora de corte: si es antes de las 3pm usa el día anterior hábil
-    // Si es después de las 3pm, usa el día de hoy
-    if ahora.hour() < 15 {
+    if ahora.hour() < 20 {
         hoy = hoy - Duration::days(1);
-        println!("[DEBUG] Antes de las 3pm, usando día anterior: {}", hoy);
+        println!("[DEBUG] Antes de las 8pm, usando día anterior: {}", hoy);
     } else {
-        println!("[DEBUG] Después de las 3pm, usando día actual: {}", hoy);
+        println!("[DEBUG] Después de las 8pm, usando día actual: {}", hoy);
     }
     
     // Ajusta para fin de semana si aplica

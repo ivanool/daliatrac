@@ -11,6 +11,7 @@ mod assets;
 mod user_management;
 mod ticker_search;
 mod ticker_tape;
+mod heapmap;
 pub mod data_bursatil_client;
 
 // State para compartir la conexión de base de datos
@@ -357,6 +358,14 @@ async fn get_cotizaciones(
     }
 }
 
+#[tauri::command]
+async fn get_heatmap_data() -> Result<Vec<heapmap::Asset>, String> {
+    match heapmap::load_index().await {
+        Ok(assets) => Ok(assets),
+        Err(e) => Err(format!("Error loading heatmap data: {}", e))
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     dotenv().ok();
@@ -393,6 +402,7 @@ pub fn run() {
             get_portfolio_transactions,
             search_tickers,
             get_cotizaciones,
+            get_heatmap_data,
             asset_services::get_asset_details,
             user_management::list_users_with_portfolios,
             user_management::create_user,

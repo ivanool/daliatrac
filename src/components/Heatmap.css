@@ -1,0 +1,338 @@
+.heatmap-widget {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--makima-gray-200, #eeeeee);
+  box-shadow: 0 4px 20px rgba(244, 197, 66, 0.1);
+  transition: all 0.3s ease;
+}
+
+.theme-dark .heatmap-widget {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.widget-header h3 {
+  margin: 0;
+  color: var(--makima-gray-900, #212121);
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.theme-dark .widget-header h3 {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.refresh-button {
+  background: linear-gradient(135deg, var(--makima-gold, #f4c542), var(--makima-gold-dark, #d4a934));
+  border: none;
+  border-radius: 8px;
+  color: var(--makima-gray-900, #212121);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(244, 197, 66, 0.25);
+}
+
+.refresh-button:hover {
+  background: linear-gradient(135deg, var(--makima-gold-dark, #d4a934), var(--makima-gold, #f4c542));
+  transform: translateY(-2px) rotate(180deg);
+  box-shadow: 0 4px 12px rgba(244, 197, 66, 0.35);
+}
+
+.theme-dark .refresh-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-dark .refresh-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px) rotate(180deg);
+}
+
+.heatmap-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  min-height: 400px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.heatmap-item {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid var(--makima-gray-200, #eeeeee);
+  min-height: 80px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.theme-dark .heatmap-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.heatmap-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.heatmap-item:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.heatmap-symbol {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  color: var(--makima-gray-900, #212121);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.heatmap-change {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  line-height: 1.1;
+  font-family: 'Inter', sans-serif;
+}
+
+.heatmap-price {
+  font-size: 11px;
+  opacity: 0.7;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--makima-gray-600, #757575);
+  font-family: 'Inter', sans-serif;
+}
+
+.theme-dark .heatmap-symbol {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.theme-dark .heatmap-price {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Color classes for performance - Tema Makima */
+.positive-strong { 
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: white; 
+  border-color: #27ae60;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.positive-medium { 
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.8), rgba(46, 204, 113, 0.8));
+  color: white; 
+  border-color: rgba(39, 174, 96, 0.6);
+  box-shadow: 0 3px 10px rgba(39, 174, 96, 0.25);
+}
+
+.positive-weak { 
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.15), rgba(46, 204, 113, 0.15));
+  color: var(--makima-gray-900, #212121);
+  border-color: rgba(39, 174, 96, 0.3);
+}
+
+.negative-weak { 
+  background: linear-gradient(135deg, rgba(214, 48, 49, 0.15), rgba(167, 30, 30, 0.15));
+  color: var(--makima-gray-900, #212121);
+  border-color: rgba(214, 48, 49, 0.3);
+}
+
+.negative-medium { 
+  background: linear-gradient(135deg, rgba(214, 48, 49, 0.8), rgba(167, 30, 30, 0.8));
+  color: white; 
+  border-color: rgba(214, 48, 49, 0.6);
+  box-shadow: 0 3px 10px rgba(214, 48, 49, 0.25);
+}
+
+.negative-strong { 
+  background: linear-gradient(135deg, var(--makima-red, #d63031), var(--makima-red-dark, #a71e1e));
+  color: white; 
+  border-color: var(--makima-red, #d63031);
+  box-shadow: 0 4px 12px rgba(214, 48, 49, 0.3);
+}
+
+/* Dark theme adjustments */
+.theme-dark .positive-strong,
+.theme-dark .positive-medium,
+.theme-dark .negative-strong,
+.theme-dark .negative-medium {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: var(--makima-gray-600, #757575);
+  font-family: 'Inter', sans-serif;
+}
+
+.theme-dark .loading-spinner {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.error-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: var(--makima-red, rgba(255, 68, 68, 0.8));
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  text-align: center;
+}
+
+.retry-button {
+  background: linear-gradient(135deg, var(--makima-red, rgba(255, 68, 68, 0.2)), var(--makima-gold, rgba(244, 197, 66, 0.2)));
+  border: 1px solid var(--makima-red, rgba(255, 68, 68, 0.3));
+  border-radius: 8px;
+  color: var(--makima-red, #ff8888);
+  padding: 10px 20px;
+  margin-top: 12px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  background: linear-gradient(135deg, var(--makima-red, rgba(255, 68, 68, 0.3)), var(--makima-gold, rgba(244, 197, 66, 0.3)));
+  color: var(--makima-red, #ff4444);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Theme specific styles */
+.theme-dark .heatmap-widget {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: var(--makima-gold, rgba(244, 197, 66, 0.2));
+  backdrop-filter: blur(10px);
+}
+
+.theme-light .heatmap-widget {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--makima-gold, rgba(244, 197, 66, 0.3));
+  backdrop-filter: blur(10px);
+}
+
+.theme-light .widget-header h3 {
+  color: var(--makima-gray-800, rgba(0, 0, 0, 0.8));
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+.theme-light .refresh-button {
+  background: linear-gradient(135deg, var(--makima-gold, rgba(244, 197, 66, 0.1)), var(--makima-red, rgba(214, 48, 49, 0.1)));
+  border-color: var(--makima-gold, rgba(244, 197, 66, 0.3));
+  color: var(--makima-gray-700, rgba(0, 0, 0, 0.7));
+}
+
+.theme-light .refresh-button:hover {
+  background: linear-gradient(135deg, var(--makima-gold, rgba(244, 197, 66, 0.2)), var(--makima-red, rgba(214, 48, 49, 0.2)));
+  transform: translateY(-1px);
+}
+
+.theme-light .heatmap-item {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--makima-gold, rgba(244, 197, 66, 0.2));
+}
+
+.theme-light .loading-spinner {
+  color: var(--makima-gray-600, rgba(0, 0, 0, 0.6));
+}
+
+/* Size classes for different performance levels */
+.size-xl {
+  grid-column: span 2;
+  grid-row: span 2;
+  font-size: 1.3em;
+  min-height: 120px;
+}
+
+.size-large {
+  grid-column: span 2;
+  font-size: 1.15em;
+  min-height: 100px;
+}
+
+.size-medium {
+  grid-column: span 1;
+  font-size: 1em;
+  min-height: 80px;
+}
+
+.size-small {
+  grid-column: span 1;
+  font-size: 0.95em;
+  min-height: 80px;
+  opacity: 0.9;
+}
+
+/* Responsivo para pantallas pequeñas */
+@media (max-width: 768px) {
+  .heatmap-container {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+  }
+  
+  .size-xl {
+    grid-column: span 2;
+    grid-row: span 1;
+    min-height: 90px;
+  }
+  
+  .size-large {
+    grid-column: span 1;
+    min-height: 80px;
+  }
+  
+  .heatmap-symbol {
+    font-size: 13px;
+  }
+  
+  .heatmap-change {
+    font-size: 12px;
+  }
+  
+  .heatmap-price {
+    font-size: 10px;
+  }
+  
+  .heatmap-item {
+    min-height: 70px;
+    padding: 12px;
+  }
+}

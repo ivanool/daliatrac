@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useTheme } from '../App';
 import { invoke } from '@tauri-apps/api/core';
 import StockChart from './StockChart';
+import Heatmap from './Heatmap';
+import { getAppState, saveAppState } from '../utils/appState';
 import './Dashboard.css';
 
 interface SearchResult {
@@ -13,7 +15,8 @@ interface SearchResult {
 
 const Dashboard = () => {
   const { theme } = useTheme();
-  const [selectedTicker, setSelectedTicker] = useState('NAFTRACISHRS');
+  const savedState = getAppState();
+  const [selectedTicker, setSelectedTicker] = useState(savedState.selectedTicker || 'NAFTRACISHRS');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -25,15 +28,19 @@ const Dashboard = () => {
     news: true,
   });
 
-  // Cargar el último ticker visto desde localStorage
+  const handleAssetNavigation = (ticker: string) => {
+    console.log(`Dashboard: Navegando a Assets con ticker ${ticker}`);
+    // Emitir un evento personalizado que el App.tsx pueda escuchar
+    window.dispatchEvent(new CustomEvent('navigateToAssets', { 
+      detail: { ticker } 
+    }));
+  };
+
+  // Cargar el último ticker visto desde el estado centralizado
   useEffect(() => {
-    try {
-      const lastTicker = localStorage.getItem('lastViewedTicker');
-      if (lastTicker && popularTickers.includes(lastTicker)) {
-        setSelectedTicker(lastTicker);
-      }
-    } catch (error) {
-      console.warn('Error loading last viewed ticker:', error);
+    const savedState = getAppState();
+    if (savedState.selectedTicker && popularTickers.includes(savedState.selectedTicker)) {
+      setSelectedTicker(savedState.selectedTicker);
     }
   }, []);
 
@@ -57,16 +64,14 @@ const Dashboard = () => {
     }
   };
 
-  // Guardar el ticker seleccionado
+  // Guardar el ticker seleccionado en el estado centralizado
   const handleTickerChange = (ticker: string) => {
     setSelectedTicker(ticker);
     setSearchQuery('');
     setShowSearchResults(false);
-    try {
-      localStorage.setItem('lastViewedTicker', ticker);
-    } catch (error) {
-      console.warn('Error saving ticker to localStorage:', error);
-    }
+    
+    // Guardar en el estado centralizado
+    saveAppState({ selectedTicker: ticker });
   };
 
   const toggleWidget = (widget: string) => {
@@ -78,17 +83,6 @@ const Dashboard = () => {
 
   const popularTickers = [
     'AMXB', 'WALMEX', 'GFNORTEO', 'FEMSA', 'CEMEX', 'KIMBERA', 'GRUMAB', 'ALSEA'
-  ];
-
-  const heatmapData = [
-    { symbol: 'WALMEX', change: '+3.2%', price: '64.50', className: 'positive-strong' },
-    { symbol: 'GFNORTEO', change: '+2.1%', price: '128.30', className: 'positive-medium' },
-    { symbol: 'AMXL', change: '-0.8%', price: '12.45', className: 'negative-weak' },
-    { symbol: 'FEMSA', change: '+0.5%', price: '98.75', className: 'positive-weak' },
-    { symbol: 'CEMEX', change: '-2.3%', price: '5.80', className: 'negative-medium' },
-    { symbol: 'KIMBERA', change: '+4.1%', price: '34.20', className: 'positive-strong' },
-    { symbol: 'GRUMAB', change: '-3.7%', price: '142.10', className: 'negative-strong' },
-    { symbol: 'ALSEA', change: '+1.9%', price: '28.60', className: 'positive-medium' },
   ];
 
   const marketStats = [
@@ -175,25 +169,7 @@ const Dashboard = () => {
 
         {/* Widget de Mapa de Calor */}
         {activeWidgets.heatmap && (
-          <div className="widget heatmap-widget">
-            <div className="widget-header">
-              <h3 className="widget-title">Mapa de Calor - Top Acciones</h3>
-              <button className="widget-menu">⋮</button>
-            </div>
-            <div className="heatmap-container">
-              {heatmapData.map((item, index) => (
-                <div 
-                  key={index} 
-                  className={`heatmap-item ${item.className}`}
-                  onClick={() => handleTickerChange(item.symbol)}
-                >
-                  <div className="heatmap-symbol">{item.symbol}</div>
-                  <div className="heatmap-price">${item.price}</div>
-                  <div className="heatmap-change">{item.change}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Heatmap className="widget" onAssetClick={handleAssetNavigation} />
         )}
 
         {/* Widget de Resumen de Mercado */}

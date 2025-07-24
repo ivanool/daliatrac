@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import UserBubble from './UserBubble';
 import TickerTape from './TickerTape';
+import { getAppState, clearAppState } from '../utils/appState';
 
 interface SearchResult {
   razon_social: string;
@@ -58,6 +59,23 @@ const Header = ({
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [hasSavedState, setHasSavedState] = useState(false);
+
+  // Check if there's saved state
+  useEffect(() => {
+    const savedState = getAppState();
+    const hasState = !!(savedState.selectedTicker || savedState.portfolioSelection || savedState.currentUser);
+    setHasSavedState(hasState);
+  }, []);
+
+  const handleClearSavedState = () => {
+    if (window.confirm('¿Estás seguro de que quieres limpiar todas las preferencias guardadas?')) {
+      clearAppState();
+      setHasSavedState(false);
+      // Reload the page to reset to default state
+      window.location.reload();
+    }
+  };
 
   // Búsqueda en tiempo real
   useEffect(() => {
@@ -114,7 +132,29 @@ const Header = ({
   return (
     <header className="header">
       <div className="header-content">
-        <div className="logo">Dalia</div>
+        <div className="logo-section" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div className="logo">Dalia</div>
+          {hasSavedState && (
+            <button 
+              className="clear-state-btn"
+              onClick={handleClearSavedState}
+              title="Limpiar preferencias guardadas"
+              style={{
+                background: 'rgba(244, 197, 66, 0.2)',
+                border: '1px solid rgba(244, 197, 66, 0.4)',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                fontSize: '10px',
+                color: 'var(--makima-gold-dark)',
+                cursor: 'pointer',
+                fontFamily: 'Inter',
+                fontWeight: '500'
+              }}
+            >
+              🔄 Reset
+            </button>
+          )}
+        </div>
         
         <div className="search-container">
           <div className="search-icon">🔍</div>

@@ -614,7 +614,7 @@ pub async fn get_top_async() -> Result<TopResponse, Box<dyn std::error::Error>> 
     let api_key = get_api_key();
     let now = Local::now();
     let mut fecha = now.date_naive();
-    if now.hour() < 7 {
+    if now.hour() < 15 {
         fecha = fecha.pred_opt().expect("No previous date");
     }
     let fecha_str = fecha.format("%Y-%m-%d").to_string();
@@ -1032,7 +1032,6 @@ pub async fn get_indices_async() -> Result<IndicesResponse, Box<dyn std::error::
 
 #[command]
 pub fn get_indices_tauri() -> Result<IndicesResponse, String> {
-    // get_indices().map_err(|e| e.to_string())
     Err("get_indices is not implemented".to_string())
 }
 
@@ -1085,7 +1084,7 @@ pub fn fecha_valida_intradia() -> chrono::NaiveDate {
     let now = Local::now();
     let mut fecha = now.date_naive();
     // Si es antes de las 8:30am, retrocede al día hábil anterior
-    if now.hour() < 15 || (now.hour() == 15 && now.minute() < 30) {
+    if now.hour() < 20 || (now.hour() == 20 && now.minute() < 30) {
         // Retrocede hasta encontrar un día hábil (lunes a viernes)
         loop {
             fecha = fecha - chrono::Duration::days(1);

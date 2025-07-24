@@ -10,6 +10,7 @@ import Assets from "./components/Assets";
 import UserPortfolioSelector from "./components/UserPortfolioSelector";
 import CreateUserModal from "./components/CreateUserModal";
 import CreatePortfolioModal from "./components/CreatePortfolioModal";
+import { saveAppState, getAppState, AppState, clearAppState } from "./utils/appState";
 
 interface UserWithPortfolios {
   id: number;
@@ -47,18 +48,25 @@ export const ThemeContext = createContext<ThemeContextType>({
 export const useTheme = () => useContext(ThemeContext);
 
 function App() {
-  const [activePage, setActivePage] = useState<PageType>('dashboard');
+  // Load saved state from localStorage
+  const savedState = getAppState();
+  
+  const [activePage, setActivePage] = useState<PageType>(savedState.activePage as PageType || 'dashboard');
   const [searchTerm, setSearchTerm] = useState("");
-  const [portfolioSelection, setPortfolioSelection] = useState<PortfolioSelection | null>(null);
+  const [portfolioSelection, setPortfolioSelection] = useState<PortfolioSelection | null>(savedState.portfolioSelection || null);
   const [currentUser, setCurrentUser] = useState<UserWithPortfolios | null>(null);
   const [currentPortfolio, setCurrentPortfolio] = useState<PortfolioType | null>(null);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [showCreatePortfolioModal, setShowCreatePortfolioModal] = useState(false);
-  const [theme, setTheme] = useState<Theme>("light");
-  const [selectedTicker, setSelectedTicker] = useState<string>('WALMEX');
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
+  const [theme, setTheme] = useState<Theme>(savedState.theme as Theme || "light");
+  const [selectedTicker, setSelectedTicker] = useState<string>(savedState.selectedTicker || 'WALMEX');
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    saveAppState({ theme: newTheme });
+  };
 
-  // Load first user automatically
+  // Load first user automatically and restore state
   useEffect(() => {
     loadFirstUser();
   }, []);
@@ -67,15 +75,86 @@ function App() {
     document.body.className = theme === "dark" ? "theme-dark" : "theme-light";
   }, [theme]);
 
+  // Restore user and portfolio from saved state after loading users
+  useEffect(() => {
+    if (currentUser && savedState.currentUser && savedState.currentPortfolio) {
+      // Try to find the saved user and portfolio
+      const savedUserId = savedState.currentUser.id;
+      const savedPortfolioId = savedState.currentPortfolio.id;
+      
+      if (currentUser.id === savedUserId) {
+        const savedPortfolio = currentUser.portfolios.find(p => p.id === savedPortfolioId);
+        if (savedPortfolio) {
+          setCurrentPortfolio(savedPortfolio);
+        }
+      }
+    }
+  }, [currentUser]);
+
+  // Listener para navegación desde el heatmap
+  useEffect(() => {
+    const handleNavigateToAssets = (event: CustomEvent) => {
+      const { ticker } = event.detail;
+      console.log(`App: Recibido evento navigateToAssets con ticker ${ticker}`);
+      setSelectedTicker(ticker);
+      setActivePage('assets');
+      // Save the new state
+      saveAppState({ 
+        selectedTicker: ticker, 
+        activePage: 'assets' 
+      });
+    };
+
+    window.addEventListener('navigateToAssets', handleNavigateToAssets as EventListener);
+    
+    return () => {
+      window.removeEventListener('navigateToAssets', handleNavigateToAssets as EventListener);
+    };
+  }, []);
+
   const loadFirstUser = async () => {
     try {
       const users = await invoke<UserWithPortfolios[]>('list_users_with_portfolios');
       if (users.length > 0) {
-        const firstUser = users[0];
-        setCurrentUser(firstUser);
-        // Auto-seleccionar el primer portafolio si existe
-        if (firstUser.portfolios.length > 0) {
-          setCurrentPortfolio(firstUser.portfolios[0]);
+        const savedState = getAppState();
+        let userToSelect = users[0];
+        
+        // Try to restore the previously selected user
+        if (savedState.currentUser) {
+          const savedUser = users.find(u => u.id === savedState.currentUser!.id);
+          if (savedUser) {
+            userToSelect = savedUser;
+          }
+        }
+        
+        setCurrentUser(userToSelect);
+        
+        // Auto-seleccionar el portafolio guardado o el primero si existe
+        if (userToSelect.portfolios.length > 0) {
+          let portfolioToSelect = userToSelect.portfolios[0];
+          
+          if (savedState.currentPortfolio) {
+            const savedPortfolio = userToSelect.portfolios.find(p => p.id === savedState.currentPortfolio!.id);
+            if (savedPortfolio) {
+              portfolioToSelect = savedPortfolio;
+            }
+          }
+          
+          setCurrentPortfolio(portfolioToSelect);
+          
+          // Save the restored state
+          saveAppState({
+            currentUser: {
+              id: userToSelect.id,
+              username: userToSelect.username,
+              email: userToSelect.email
+            },
+            currentPortfolio: {
+              id: portfolioToSelect.id,
+              user_id: portfolioToSelect.user_id,
+              name: portfolioToSelect.name
+            }
+          });
         }
       }
     } catch (err) {
@@ -93,17 +172,49 @@ function App() {
     }
     // Reset portfolio selection when user changes
     setPortfolioSelection(null);
+    
+    // Save user selection
+    saveAppState({
+      currentUser: {
+        id: user.id,
+        username: user.username,
+        email: user.email
+      },
+      currentPortfolio: user.portfolios.length > 0 ? {
+        id: user.portfolios[0].id,
+        user_id: user.portfolios[0].user_id,
+        name: user.portfolios[0].name
+      } : undefined,
+      portfolioSelection: undefined
+    });
   };
 
   const handlePortfolioChange = (portfolio: PortfolioType) => {
     setCurrentPortfolio(portfolio);
     // Reset portfolio selection when portfolio changes
     setPortfolioSelection(null);
+    
+    // Save portfolio selection
+    saveAppState({
+      currentPortfolio: {
+        id: portfolio.id,
+        user_id: portfolio.user_id,
+        name: portfolio.name
+      },
+      portfolioSelection: undefined
+    });
   };
 
   const handleViewPortfolio = (userId: number, portfolioId: number, userName: string, portfolioName: string) => {
-    setPortfolioSelection({ userId, portfolioId, userName, portfolioName });
+    const selection = { userId, portfolioId, userName, portfolioName };
+    setPortfolioSelection(selection);
     setActivePage('portfolio');
+    
+    // Save portfolio selection and page
+    saveAppState({
+      portfolioSelection: selection,
+      activePage: 'portfolio'
+    });
   };
 
   const handleCreateUser = () => {
@@ -123,11 +234,22 @@ function App() {
   };
 
   const handlePortfolioSelectionComplete = (userId: number, portfolioId: number, userName: string, portfolioName: string) => {
-    setPortfolioSelection({ userId, portfolioId, userName, portfolioName });
+    const selection = { userId, portfolioId, userName, portfolioName };
+    setPortfolioSelection(selection);
+    
+    // Save portfolio selection
+    saveAppState({
+      portfolioSelection: selection
+    });
   };
 
   const handleTickerSelect = (ticker: string) => {
     setSelectedTicker(ticker);
+    
+    // Save ticker selection
+    saveAppState({
+      selectedTicker: ticker
+    });
   };
 
   const renderPage = () => {
@@ -177,8 +299,14 @@ function App() {
     // Reset portfolio selection when changing pages
     if (page !== 'portfolio') {
       setPortfolioSelection(null);
+      saveAppState({ portfolioSelection: undefined });
     }
     setActivePage(page);
+    
+    // Save active page
+    saveAppState({
+      activePage: page
+    });
   };
 
   return (
