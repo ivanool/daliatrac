@@ -1,30 +1,8 @@
 use deadpool_postgres::Pool;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use chrono::Datelike;
-fn get_ultimo_dia_habil(fecha: chrono::NaiveDate) -> chrono::NaiveDate {
-    use chrono::{Duration, Weekday};
-    let mut ultima_fecha = fecha;
-    
-    loop {
-        match ultima_fecha.weekday() {
-            Weekday::Sat => {
-                println!("[DEBUG] {} is Saturday, moving to Friday", ultima_fecha);
-                ultima_fecha = ultima_fecha - Duration::days(1);
-            }, 
-            Weekday::Sun => {
-                println!("[DEBUG] {} is Sunday, moving to Friday", ultima_fecha);
-                ultima_fecha = ultima_fecha - Duration::days(2);
-            }, 
-            _ => {
-                println!("[DEBUG] {} is a business day ({})", ultima_fecha, ultima_fecha.weekday());
-                break;
-            }
-        }
-    }
-    
-    ultima_fecha
-}
+use chrono::{Datelike, Duration, Local, NaiveDate, Timelike, Weekday};
+
 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,6 +10,57 @@ pub struct DailyClose {
     pub date: chrono::NaiveDate,
     pub close: Option<f64>,
 }
+
+
+
+fn get_ultimo_dia_habil(fecha: NaiveDate) -> NaiveDate {
+    match fecha.weekday() {
+        Weekday::Sat => fecha - Duration::days(1),
+        Weekday::Sun => fecha - Duration::days(2),
+        _ => fecha,
+    }
+}
+
+fn comparar_dias_habiles(meses: i32) -> (NaiveDate, NaiveDate) {
+    let ahora = Local::now();
+    let mut hoy = ahora.date_naive();
+    
+    println!("[DEBUG] Hora actual: {} (hora: {})", ahora, ahora.hour());
+    println!("[DEBUG] Fecha original hoy: {}", hoy);
+    
+    // Verifica la hora de corte: si es antes de las 3pm usa el día anterior hábil
+    // Si es después de las 3pm, usa el día de hoy
+    if ahora.hour() < 15 {
+        hoy = hoy - Duration::days(1);
+        println!("[DEBUG] Antes de las 3pm, usando día anterior: {}", hoy);
+    } else {
+        println!("[DEBUG] Después de las 3pm, usando día actual: {}", hoy);
+    }
+    
+    // Ajusta para fin de semana si aplica
+    let hoy_habil = get_ultimo_dia_habil(hoy);
+    println!("[DEBUG] Último día hábil calculado: {}", hoy_habil);
+    
+    let mut año = hoy_habil.year();
+    let mut mes = hoy_habil.month() as i32 - meses;
+
+    while mes <= 0 {
+        mes += 12;
+        año -= 1;
+    }
+
+    let fecha_pasada = NaiveDate::from_ymd_opt(año, mes as u32, hoy_habil.day())
+        .unwrap_or_else(|| NaiveDate::from_ymd_opt(año, mes as u32, 28).unwrap());
+
+    let pasada_habil = get_ultimo_dia_habil(fecha_pasada);
+    
+    println!("[DEBUG] Fecha pasada calculada ({} meses atrás): {}", meses, pasada_habil);
+    println!("[DEBUG] Retornando: hoy_habil={}, pasada_habil={}", hoy_habil, pasada_habil);
+
+    (hoy_habil, pasada_habil)
+}
+
+
 
 pub async fn get_trimestres_disponibles(pool: &Pool, emisora: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
     let client = match pool.get().await {
@@ -214,187 +243,47 @@ pub async fn get_quarterly_income_statement(
     Ok(estado_resultado)
 }
 
-pub async fn historical_data_intradia(ticker: &str, months: i32, pool: &Pool) -> Result<Vec<DailyClose>, Box<dyn std::error::Error>> {
-    use chrono::{Duration, Utc, NaiveDate};
-    let client = pool.get().await?;
-    
-    // Obtener el último día hábil (lunes a viernes)
-    let today = Utc::now().date_naive();
-    let ultimo_dia_habil = get_ultimo_dia_habil(today);
-    
-    // Calcular fecha de inicio aproximada
-    let requested_start_date_raw = ultimo_dia_habil - Duration::days((months as i64) * 30);
-    // IMPORTANTE: También convertir la fecha de inicio a día hábil
-    let requested_start_date = get_ultimo_dia_habil(requested_start_date_raw);
-    
-    println!("[DEBUG] Today: {}, Last business day: {}", today, ultimo_dia_habil);
-    println!("[DEBUG] Raw start date: {}, Business start date: {}", requested_start_date_raw, requested_start_date);
+pub async fn historical_data_intradia(
+    ticker: &str,
+    months: i32,
+) -> Result<Vec<DailyClose>, Box<dyn std::error::Error>> {
+    let (ultimo_dia_habil, requested_start_date) = comparar_dias_habiles(months);
+    println!("[FAST] ultimo dia habil {}", ultimo_dia_habil);
+    println!("[FAST] requested start {}", requested_start_date);
+    println!(
+        "[FAST] Today (business day): {}, Start date (business day): {}",
+        ultimo_dia_habil, requested_start_date
+    );
 
-    // Primero verificamos qué intervalos de datos existen para este ticker
-    let check_sql = r#"
-        SELECT MIN(fecha_hora::date) as min_date, 
-               MAX(fecha_hora::date) as max_date, 
-               COUNT(*) as total_records,
-               COUNT(DISTINCT fecha_hora::date) as unique_days
-        FROM intradia_data
-        WHERE LOWER(emisora) = LOWER($1)
-            AND precio > 0  -- Solo considerar precios válidos
-    "#;
-    
-    let check_row = client.query_one(check_sql, &[&ticker]).await?;
-    let min_date: Option<NaiveDate> = check_row.get("min_date");
-    let max_date: Option<NaiveDate> = check_row.get("max_date");
-    let total_records: i64 = check_row.get("total_records");
-    let unique_days: i64 = check_row.get("unique_days");
-    
-    println!("[DEBUG] Checking historical data for ticker: {}", ticker);
-    println!("[DEBUG] DB Info for {}: {} records across {} unique days from {:?} to {:?}", 
-             ticker, total_records, unique_days, min_date, max_date);
-    
-    // Determinar el rango de fechas a usar basado en los datos disponibles
-    let (query_start_date, query_end_date) = match (min_date, max_date) {
-        (Some(min), Some(max)) => {
-            // Tenemos datos: usar el intervalo disponible, limitado por la solicitud del usuario
-            let effective_start = if requested_start_date > min {
-                requested_start_date
-            } else {
-                min
-            };
-            
-            let effective_end = if ultimo_dia_habil < max {
-                ultimo_dia_habil
-            } else {
-                max
-            };
-            
-            println!("[DEBUG] Using available data range: {} to {} (requested: {} to {})", 
-                     effective_start, effective_end, requested_start_date, ultimo_dia_habil);
-            
-            (effective_start, effective_end)
-        },
-        _ => {
-            // No hay datos o datos inválidos: intentar obtener datos del API
-            println!("[DEBUG] No valid data found, attempting to fetch from API...");
-            
-            // Intentar diferentes variaciones del ticker
-            let ticker_with_asterisk = format!("{}*", ticker);
-            let ticker_without_asterisk = ticker.replace("*", "");
-            let ticker_variations = vec![
-                ticker,
-                &ticker_with_asterisk,  // Agregar asterisco
-                &ticker_without_asterisk, // Quitar asterisco
-            ];
-            
-            let mut api_success = false;
-            for variant in &ticker_variations {
-                println!("[DEBUG] Trying ticker variant: {}", variant);
-                match crate::data_bursatil_client::get_intradia_async(&[variant], &requested_start_date.to_string(), &ultimo_dia_habil.to_string(), &client).await {
-                    Ok(_) => {
-                        api_success = true;
-                        break;
-                    },
-                    Err(e) => {
-                        println!("[DEBUG] API call failed for {}: {}", variant, e);
-                    }
+    let ticker_with_asterisk = format!("{}*", ticker);
+    let ticker_without_asterisk = ticker.replace('*', "");
+    let ticker_variations = vec![
+        ticker,
+        &ticker_with_asterisk,
+        &ticker_without_asterisk,
+    ];
+
+    for variant in &ticker_variations {
+        println!("[FAST] Trying ticker variant: {}", variant);
+        match crate::data_bursatil_client::get_intradia_direct(
+            &[variant],
+            &requested_start_date.to_string(),
+            &ultimo_dia_habil.to_string(),
+        ).await {
+            Ok(data) => {
+                if !data.is_empty() {
+                    println!("[FAST] Successfully got {} data points for {}", data.len(), variant);
+                    return Ok(data);
+                } else {
+                    println!("[FAST] No data returned for {}", variant);
                 }
-            }
-            
-            if api_success {
-                // Verificar después del intento de obtener datos
-                let check_row2 = client.query_one(check_sql, &[&ticker]).await?;
-                let total_records2: i64 = check_row2.get("total_records");
-                let min_date2: Option<NaiveDate> = check_row2.get("min_date");
-                let max_date2: Option<NaiveDate> = check_row2.get("max_date");
-                println!("[DEBUG] After API call: {} records for {} from {:?} to {:?}", 
-                         total_records2, ticker, min_date2, max_date2);
-            } else {
-                println!("[DEBUG] All API attempts failed for ticker: {}", ticker);
-            }
-            
-            // Usar las fechas solicitadas como fallback
-            (requested_start_date, ultimo_dia_habil)
-        }
-    };
-
-    // Verificar si necesitamos actualizar datos existentes
-    if let Some(last_date) = max_date {
-        let days_old = (ultimo_dia_habil - last_date).num_days();
-        if days_old > 2 {
-            // Asegurar que last_date sea un día hábil para la API
-            let last_date_habil = get_ultimo_dia_habil(last_date);
-            println!("[DEBUG] Data is {} days old, fetching recent data from {} to {}", 
-                     days_old, last_date_habil, ultimo_dia_habil);
-            let _ = crate::data_bursatil_client::get_intradia_async(&[ticker], &last_date_habil.to_string(), &ultimo_dia_habil.to_string(), &client).await;
-        }
-    }
-    
-    // Consulta optimizada usando el intervalo específico detectado
-    let sql = r#"
-        WITH daily_data AS (
-            SELECT fecha_hora::date AS date,
-                   fecha_hora,
-                   precio,
-                   ROW_NUMBER() OVER (PARTITION BY fecha_hora::date ORDER BY fecha_hora DESC) as rn
-            FROM intradia_data
-            WHERE LOWER(emisora) = LOWER($1) 
-                AND fecha_hora::date BETWEEN $2 AND $3
-                AND precio > 0  -- Asegurar precios válidos
-        )
-        SELECT date, precio as close
-        FROM daily_data
-        WHERE rn = 1  -- Tomar el último precio de cada día (precio de cierre)
-        ORDER BY date ASC
-    "#;
-    
-    println!("[DEBUG] Executing optimized query for ticker: {} between {} and {}", 
-             ticker, query_start_date, query_end_date);
-    let rows = client.query(sql, &[&ticker, &query_start_date, &query_end_date]).await?;
-    println!("[DEBUG] Query returned {} rows for {}", rows.len(), ticker);
-    
-    let mut results = Vec::new();
-    
-    for row in rows {
-        let date: NaiveDate = row.get("date");
-        let close: f64 = row.get("close");
-        
-        results.push(DailyClose { 
-            date, 
-            close: Some(close)
-        });
-    }
-
-    // Si no hay datos, mostrar emisoras similares disponibles
-    if results.is_empty() {
-        println!("[DEBUG] No data found in optimal range. Checking available emisoras...");
-        let emisoras_sql = r#"
-            SELECT DISTINCT emisora, 
-                   COUNT(*) as records,
-                   MIN(fecha_hora::date) as first_date,
-                   MAX(fecha_hora::date) as last_date
-            FROM intradia_data 
-            WHERE emisora ILIKE $1 
-                AND precio > 0
-            GROUP BY emisora 
-            ORDER BY records DESC 
-            LIMIT 10
-        "#;
-        let like_pattern = format!("%{}%", ticker);
-        let emisoras_rows = client.query(emisoras_sql, &[&like_pattern]).await?;
-        
-        println!("[DEBUG] Similar emisoras found:");
-        for row in emisoras_rows {
-            let emisora: String = row.get("emisora");
-            let records: i64 = row.get("records");
-            let first_date: Option<NaiveDate> = row.get("first_date");
-            let last_date: Option<NaiveDate> = row.get("last_date");
-            println!("[DEBUG]   - {} ({} records, {:?} to {:?})", emisora, records, first_date, last_date);
+            },
+            Err(e) => println!("[FAST] API failed for {}: {}", variant, e),
         }
     }
 
-    println!("[DEBUG] Returning {} valid data points for ticker: {} in range {} to {}", 
-             results.len(), ticker, query_start_date, query_end_date);
-    
-    Ok(results)
+    println!("[FAST] All API attempts failed for ticker: {}", ticker);
+    Ok(Vec::new())
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

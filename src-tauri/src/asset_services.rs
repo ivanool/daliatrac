@@ -49,7 +49,6 @@ pub async fn get_asset_details(ticker: String, state: tauri::State<'_, crate::Ap
     let client = state.db_pool.get().await.map_err(|e| e.to_string())?;
     println!("[DEBUG] Processing ticker: {}", ticker);
     
-    // Buscar directamente en la tabla emisoras usando el ticker completo o partes del mismo
     let search_sql = "SELECT razon_social, emisoras, serie FROM emisoras WHERE emisoras || serie = $1 OR emisoras = $1 LIMIT 1";
     let row_opt = client.query_opt(search_sql, &[&ticker]).await.map_err(|e| e.to_string())?;
     
@@ -96,7 +95,7 @@ pub async fn get_asset_details(ticker: String, state: tauri::State<'_, crate::Ap
     let mut change_percent = 0.0;
 
     if let Some(cot) = &cot_actual {
-        price = cot.precio_promedio.unwrap_or(0.0);
+        price = cot.ultimo_precio.unwrap_or(0.0);
         open = cot.ultimo_precio.unwrap_or(0.0);
         volume = cot.volumen.unwrap_or(0.0) as i64;
         change_percent = cot.cambio.unwrap_or(0.0);
@@ -112,10 +111,9 @@ pub async fn get_asset_details(ticker: String, state: tauri::State<'_, crate::Ap
         change_percent, 
     };
     println!("[DEBUG] IntradiaData created successfully");
-
+    println!("Price {}", intradia.price);
     println!("[DEBUG] Starting financial data retrieval for emisora: {}", emisora_db);
     
-    // Obtener datos financieros de manera más robusta
     let fiflow = assets::get_finantial_flow(&state.db_pool, &emisora_db, "1T_2025").await
         .unwrap_or_else(|e| {
             println!("[WARN] get_finantial_flow failed, using empty data: {}", e);
@@ -158,7 +156,7 @@ pub async fn get_asset_details(ticker: String, state: tauri::State<'_, crate::Ap
     println!("[DEBUG] trimestres_disponibles completed: {} items", trimestres_disponibles.len());
     
     println!("[DEBUG] Getting historical_data_intradia...");
-    let historical_raw = assets::historical_data_intradia(&ticker_key, 60, &state.db_pool).await
+    let historical_raw = assets::historical_data_intradia(&ticker_key, 12).await
         .unwrap_or_else(|e| {
             println!("[WARN] historical_data_intradia failed, using empty list: {}", e);
             Vec::new()
@@ -208,7 +206,6 @@ pub async fn get_emisora_from_ticker(ticker: &str, client: &Client) -> Option<St
         }
     }
     
-    // Si no se encuentra, buscar variaciones comunes
     println!("[DEBUG] No exact match found, searching similar emisoras...");
     let similar_sql = "SELECT emisoras FROM emisoras WHERE emisoras ILIKE $1 LIMIT 10";
     let like_pattern = format!("%{}%", ticker);
@@ -219,7 +216,6 @@ pub async fn get_emisora_from_ticker(ticker: &str, client: &Client) -> Option<St
             println!("[DEBUG]   - {}", emisora);
         }
         
-        // Si encontramos similares, usar el primero que contenga la parte principal
         for row in &rows {
             let emisora: String = row.get(0);
             if ticker.starts_with(&emisora) || emisora.contains(&ticker[..ticker.len().min(6)]) {
@@ -228,7 +224,6 @@ pub async fn get_emisora_from_ticker(ticker: &str, client: &Client) -> Option<St
             }
         }
         
-        // Si no hay coincidencia lógica, usar el primer resultado
         if let Some(first_row) = rows.first() {
             let emisora: String = first_row.get(0);
             println!("[DEBUG] Using first similar emisora: {} for ticker: {}", emisora, ticker);
@@ -236,7 +231,6 @@ pub async fn get_emisora_from_ticker(ticker: &str, client: &Client) -> Option<St
         }
     }
     
-    // Como último recurso, buscar en toda la tabla emisoras que tengan relación con el ticker
     println!("[DEBUG] Trying broader search...");
     let broad_sql = "SELECT DISTINCT emisoras FROM emisoras ORDER BY emisoras LIMIT 20";
     if let Ok(rows) = client.query(broad_sql, &[]).await {

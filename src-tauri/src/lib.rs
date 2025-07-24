@@ -28,7 +28,7 @@ async fn run_demo_operations(state: State<'_, AppState>) -> Result<String, Strin
     let months = 12;
     
     // Procesar datos históricos inmediatamente
-    match assets::historical_data_intradia(ticker, months, db_pool).await {
+    match assets::historical_data_intradia(ticker, months).await {
         Ok(data) => {
             if let Some(last_close) = data.last() {
                 result.push_str(&format!("Ticker: {}\n", ticker));
@@ -149,11 +149,8 @@ async fn run_demo_operations(state: State<'_, AppState>) -> Result<String, Strin
 async fn get_historical_data(
     ticker: String,
     months: i32,
-    state: State<'_, AppState>
 ) -> Result<Vec<assets::DailyClose>, String> {
-    let db_pool = &state.db_pool;
-    
-    match assets::historical_data_intradia(&ticker, months, db_pool).await {
+    match assets::historical_data_intradia(&ticker, months).await {
         Ok(data) => Ok(data),
         Err(e) => Err(format!("Error fetching historical data: {}", e))
     }
@@ -162,11 +159,8 @@ async fn get_historical_data(
 #[tauri::command]
 async fn debug_data_dates(
     ticker: String,
-    state: State<'_, AppState>
 ) -> Result<String, String> {
-    let db_pool = &state.db_pool;
-    
-    match assets::historical_data_intradia(&ticker, 12, db_pool).await {
+    match assets::historical_data_intradia(&ticker, 12).await {
         Ok(data) => {
             let mut result = String::new();
             result.push_str(&format!("Total records: {}\n", data.len()));
@@ -391,7 +385,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             run_demo_operations, 
-            get_historical_data, 
+            get_historical_data,
             debug_data_dates, 
             check_portfolio_exists,
             get_portfolio_holdings, 

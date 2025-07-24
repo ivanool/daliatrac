@@ -26,7 +26,7 @@ interface StockChartProps {
   compact?: boolean;
 }
 
-const StockChart = ({ ticker = 'AMXB', height = '500px', compact = false }: StockChartProps) => {
+const StockChart = ({ ticker = 'IVVPESOISHRS', height = '500px', compact = false }: StockChartProps) => {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

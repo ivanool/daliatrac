@@ -13,7 +13,7 @@ interface SearchResult {
 
 const Dashboard = () => {
   const { theme } = useTheme();
-  const [selectedTicker, setSelectedTicker] = useState('AMXB');
+  const [selectedTicker, setSelectedTicker] = useState('NAFTRACISHRS');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);

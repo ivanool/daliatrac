@@ -402,11 +402,94 @@ fn construir_url_intradia(emisoras: &[&str], inicio: &str, final_: &str, api_key
     Ok(url)
 }
 
+// Nueva función que devuelve los datos directamente sin guardarlos en BD
+pub async fn get_intradia_direct(
+    emi: &[&str], 
+    ini: &str, 
+    _fin: &str
+) -> Result<Vec<crate::assets::DailyClose>, Box<dyn std::error::Error>> {
+    let fecha_final_valida = fecha_valida_intradia();
+    let fin = &fecha_final_valida.format("%Y-%m-%d").to_string();
+    
+    let ini_date = chrono::NaiveDate::parse_from_str(ini, "%Y-%m-%d")?;
+    let ini_habil = get_ultimo_dia_habil_data_client(ini_date);
+    let ini = &ini_habil.format("%Y-%m-%d").to_string();
+    
+    let api_key = get_api_key();
+    let url = construir_url_intradia(emi, ini, fin, &api_key)?;
+    println!("[get_intradia_direct] URL consultada: {}", url);
+    
+    let client = AsyncHttpClient::new();
+    let response = client
+        .get(&url)
+        .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)")
+        .send()
+        .await?;
+    
+    let response_text = response.text().await?;
+    println!("[get_intradia_direct] Response text length: {} chars", response_text.len());
+    
+    // Verificar si la respuesta contiene un error
+    if response_text.contains("Internal Server Error") || response_text.contains("\"message\"") {
+        println!("[get_intradia_direct] API returned error for ticker(s): {:?}", emi);
+        println!("[get_intradia_direct] Error response: {}", response_text);
+        return Ok(Vec::new()); // Devolver vector vacío en caso de error
+    }
+    
+    let map: HashMap<String, serde_json::Value> = match serde_json::from_str(&response_text) {
+        Ok(map) => map,
+        Err(e) => {
+            println!("[get_intradia_direct] Failed to parse JSON for ticker(s): {:?}, error: {}", emi, e);
+            return Ok(Vec::new()); // Devolver vector vacío en caso de error
+        }
+    };
+    
+    println!("[get_intradia_direct] Parsed successfully: {} tickers", map.len());
+    
+    let mut daily_closes = Vec::new();
+    let mut daily_data: HashMap<chrono::NaiveDate, f64> = HashMap::new();
+    
+    for (ticker, inner_obj) in map {
+        if let serde_json::Value::Object(map_inner) = inner_obj {
+            for (fecha_hora_str, precio_val) in map_inner {
+                if let serde_json::Value::Number(precio_num) = precio_val {
+                    if let Some(precio) = precio_num.as_f64() {
+                        if let Ok(fecha_hora) = NaiveDateTime::parse_from_str(&fecha_hora_str, "%Y-%m-%d %H:%M:%S") {
+                            let date = fecha_hora.date();
+                            // Mantener solo el precio más reciente de cada día
+                            daily_data.entry(date)
+                                .and_modify(|existing_price| {
+                                    // Solo actualizar si este timestamp es más reciente
+                                    // Como estamos iterando por orden, simplemente sobrescribimos
+                                    *existing_price = precio;
+                                })
+                                .or_insert(precio);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Convertir a DailyClose y ordenar por fecha
+    for (date, close) in daily_data {
+        daily_closes.push(crate::assets::DailyClose {
+            date,
+            close: Some(close),
+        });
+    }
+    
+    // Ordenar por fecha
+    daily_closes.sort_by(|a, b| a.date.cmp(&b.date));
+    
+    println!("[get_intradia_direct] Returning {} daily close prices", daily_closes.len());
+    Ok(daily_closes)
+}
+
 pub async fn get_intradia_async(emi: &[&str], ini: &str, _fin: &str, pg_client: &AsyncClient) -> Result<(), Box<dyn std::error::Error>> {
     let fecha_final_valida = fecha_valida_intradia();
     let fin = &fecha_final_valida.format("%Y-%m-%d").to_string();
     
-    // También validar que la fecha de inicio sea un día hábil
     let ini_date = chrono::NaiveDate::parse_from_str(ini, "%Y-%m-%d")?;
     let ini_habil = get_ultimo_dia_habil_data_client(ini_date);
     let ini = &ini_habil.format("%Y-%m-%d").to_string();
@@ -1002,7 +1085,7 @@ pub fn fecha_valida_intradia() -> chrono::NaiveDate {
     let now = Local::now();
     let mut fecha = now.date_naive();
     // Si es antes de las 8:30am, retrocede al día hábil anterior
-    if now.hour() < 8 || (now.hour() == 8 && now.minute() < 30) {
+    if now.hour() < 15 || (now.hour() == 15 && now.minute() < 30) {
         // Retrocede hasta encontrar un día hábil (lunes a viernes)
         loop {
             fecha = fecha - chrono::Duration::days(1);
